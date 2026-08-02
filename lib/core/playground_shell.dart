@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:ui_training_model/catalog/widget_module.dart';
+import 'package:ui_training_model/chat/offline_chat_engine.dart';
+import 'package:ui_training_model/chat/widget_chat_panel.dart';
 import 'package:ui_training_model/core/controls/controls.dart';
 import 'package:ui_training_model/core/property_binding.dart';
 
 /// Generische Shell: Controls | Live-Preview (Desktop split, Mobile stacked).
+///
+/// Die Preview läuft in einem eigenen [Navigator] + [ScaffoldMessenger],
+/// damit Dialoge, Sheets und SnackBars im Phone-Frame bleiben und
+/// Gesten (Scroll/Swipe/Tap) greifen.
 class PlaygroundShell extends StatelessWidget {
   const PlaygroundShell({
     super.key,
@@ -11,6 +18,10 @@ class PlaygroundShell extends StatelessWidget {
     required this.controller,
     required this.bindings,
     required this.previewBuilder,
+    this.moduleId,
+    this.explanationDe,
+    this.useCaseDe,
+    this.faq = const [],
     this.previewHint,
   });
 
@@ -19,7 +30,20 @@ class PlaygroundShell extends StatelessWidget {
   final PlaygroundController controller;
   final List<PropertyBinding<dynamic>> bindings;
   final Widget Function(BuildContext context) previewBuilder;
+  final String? moduleId;
+  final String? explanationDe;
+  final String? useCaseDe;
+  final List<ModuleFaq> faq;
   final String? previewHint;
+
+  PlaygroundChatContext get _chatContext => PlaygroundChatContext(
+        moduleId: moduleId ?? title,
+        widgetName: title,
+        explanationDe: explanationDe ?? description,
+        useCaseDe: useCaseDe ?? description,
+        bindings: bindings,
+        faq: faq,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +51,14 @@ class PlaygroundShell extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         final wide = MediaQuery.sizeOf(context).width >= 900;
-        final controls = _ControlsPanel(bindings: bindings);
+        final controls = _ControlsPanel(
+          bindings: bindings,
+          explanationDe: explanationDe ?? description,
+          useCaseDe: useCaseDe,
+        );
         final preview = _PreviewPanel(
           hint: previewHint,
-          child: previewBuilder(context),
+          child: previewBuilder,
         );
 
         return Scaffold(
@@ -44,7 +72,24 @@ class PlaygroundShell extends StatelessWidget {
                     context: context,
                     builder: (ctx) => AlertDialog(
                       title: Text(title),
-                      content: Text(description),
+                      content: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(explanationDe ?? description),
+                            if (useCaseDe != null) ...[
+                              const SizedBox(height: 12),
+                              Text(
+                                'Einsatz',
+                                style: Theme.of(ctx).textTheme.titleSmall,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(useCaseDe!),
+                            ],
+                          ],
+                        ),
+                      ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx),
@@ -58,11 +103,12 @@ class PlaygroundShell extends StatelessWidget {
               ),
             ],
           ),
+          floatingActionButton: WidgetChatFab(chatContext: _chatContext),
           body: wide
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SizedBox(width: 360, child: controls),
+                    SizedBox(width: 380, child: controls),
                     const VerticalDivider(width: 1),
                     Expanded(child: preview),
                   ],
@@ -81,26 +127,55 @@ class PlaygroundShell extends StatelessWidget {
 }
 
 class _ControlsPanel extends StatelessWidget {
-  const _ControlsPanel({required this.bindings});
+  const _ControlsPanel({
+    required this.bindings,
+    required this.explanationDe,
+    this.useCaseDe,
+  });
 
   final List<PropertyBinding<dynamic>> bindings;
+  final String explanationDe;
+  final String? useCaseDe;
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return ColoredBox(
       color: Theme.of(context).colorScheme.surface,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
         children: [
+          Text(
+            'Über dieses Widget',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            explanationDe,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+          ),
+          if (useCaseDe != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Einsatz: $useCaseDe',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.primary,
+                    fontStyle: FontStyle.italic,
+                  ),
+            ),
+          ],
+          const SizedBox(height: 16),
           Text(
             'Eigenschaften',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 4),
           Text(
-            'Deutsche Labels + echte Flutter-Property-Namen',
+            'Deutsche Erklärung + Einsatz + echter Flutter-codeName',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: scheme.onSurfaceVariant,
                 ),
           ),
           const SizedBox(height: 12),
@@ -114,7 +189,7 @@ class _ControlsPanel extends StatelessWidget {
 class _PreviewPanel extends StatelessWidget {
   const _PreviewPanel({required this.child, this.hint});
 
-  final Widget child;
+  final Widget Function(BuildContext context) child;
   final String? hint;
 
   @override
@@ -155,7 +230,7 @@ class _PreviewPanel extends StatelessWidget {
                 child: AspectRatio(
                   aspectRatio: 9 / 16,
                   child: Container(
-                    margin: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                     decoration: BoxDecoration(
                       color: scheme.surface,
                       borderRadius: BorderRadius.circular(28),
@@ -169,7 +244,16 @@ class _PreviewPanel extends StatelessWidget {
                       ],
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: child,
+                    child: ScaffoldMessenger(
+                      child: Navigator(
+                        onGenerateRoute: (settings) {
+                          return MaterialPageRoute<void>(
+                            settings: settings,
+                            builder: (navContext) => child(navContext),
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),

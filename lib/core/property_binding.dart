@@ -9,6 +9,7 @@ class PropertyBinding<T> {
     required this.codeName,
     required this.labelDe,
     required this.helpDe,
+    required this.useCaseDe,
     required this.type,
     required this.getValue,
     required this.setValue,
@@ -25,8 +26,11 @@ class PropertyBinding<T> {
   /// Deutsche Kurzbezeichnung für die UI.
   final String labelDe;
 
-  /// Kurze Erklärung auf Deutsch.
+  /// Kurze visuelle Erklärung auf Deutsch.
   final String helpDe;
+
+  /// Typischer / empfohlener Einsatzzweck.
+  final String useCaseDe;
 
   final PropertyControlType type;
   final T Function() getValue;

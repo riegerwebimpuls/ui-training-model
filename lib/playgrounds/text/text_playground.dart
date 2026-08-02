@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ui_training_model/catalog/widget_module.dart';
 import 'package:ui_training_model/core/playground_shell.dart';
 import 'package:ui_training_model/core/property_binding.dart';
 
@@ -10,16 +11,32 @@ class TextPlayground extends StatefulWidget {
 }
 
 class _Ctrl extends PlaygroundController {
-  String data = 'Hallo Flutter';
+  String data =
+      'Langer Beispieltext zum Testen von maxLines und overflow in der Vorschau.';
   double fontSize = 24;
   FontWeight fontWeight = FontWeight.w400;
   Color color = Colors.teal;
   TextAlign textAlign = TextAlign.center;
   double letterSpacing = 0;
+  int maxLines = 2;
+  TextOverflow overflow = TextOverflow.ellipsis;
 }
 
 class _TextPlaygroundState extends State<TextPlayground> {
   final _c = _Ctrl();
+
+  static const _faq = [
+    ModuleFaq(
+      question: 'Was ist der Unterschied zwischen Text und TextStyle?',
+      answer:
+          'Text ist das Widget; TextStyle beschreibt Schriftgröße, Farbe, Gewicht und Abstände. Du übergibst style: TextStyle(...).',
+    ),
+    ModuleFaq(
+      question: 'Wann brauche ich maxLines und overflow?',
+      answer:
+          'Bei begrenztem Platz: maxLines schneidet vertikal ab, overflow steuert das Verhalten am Rand (ellipsis, fade, clip).',
+    ),
+  ];
 
   @override
   void dispose() {
@@ -32,12 +49,19 @@ class _TextPlaygroundState extends State<TextPlayground> {
     return PlaygroundShell(
       title: 'Text / TextStyle',
       description: 'Typografie-Properties von Text und TextStyle.',
+      moduleId: 'text',
+      explanationDe:
+          'Das Text-Widget rendert Strings mit TextStyle. Hier siehst du live, wie Größe, Gewicht, Farbe, Ausrichtung, Zeichenabstand, maxLines und overflow zusammenwirken.',
+      useCaseDe:
+          'Überschriften, Fließtext, Beschriftungen und jedes sichtbare Label in der UI.',
+      faq: _faq,
       controller: _c,
       bindings: [
         PropertyBinding<String>(
           codeName: 'data',
           labelDe: 'Text',
           helpDe: 'Angezeigter String-Inhalt.',
+          useCaseDe: 'Titel, Beschreibung oder dynamischer Inhalt aus dem State.',
           type: PropertyControlType.text,
           getValue: () => _c.data,
           setValue: (v) => _c.update(() => _c.data = v),
@@ -45,7 +69,8 @@ class _TextPlaygroundState extends State<TextPlayground> {
         PropertyBinding<double>(
           codeName: 'fontSize',
           labelDe: 'Schriftgröße',
-          helpDe: 'TextStyle.fontSize',
+          helpDe: 'TextStyle.fontSize in logischen Pixeln.',
+          useCaseDe: 'Hierarchie: größer für Headlines, kleiner für Captions.',
           type: PropertyControlType.slider,
           min: 10,
           max: 48,
@@ -56,7 +81,8 @@ class _TextPlaygroundState extends State<TextPlayground> {
         PropertyBinding<FontWeight>(
           codeName: 'fontWeight',
           labelDe: 'Schriftstärke',
-          helpDe: 'TextStyle.fontWeight',
+          helpDe: 'TextStyle.fontWeight (w300–w800).',
+          useCaseDe: 'Betont w600/w800 für Titel, w400 für Fließtext.',
           type: PropertyControlType.enumeration,
           enumValues: const [
             FontWeight.w300,
@@ -71,7 +97,8 @@ class _TextPlaygroundState extends State<TextPlayground> {
         PropertyBinding<double>(
           codeName: 'letterSpacing',
           labelDe: 'Zeichenabstand',
-          helpDe: 'TextStyle.letterSpacing',
+          helpDe: 'TextStyle.letterSpacing – Abstand zwischen Glyphen.',
+          useCaseDe: 'Feintuning bei Caps, Buttons oder kompakten Labels.',
           type: PropertyControlType.slider,
           min: -2,
           max: 8,
@@ -82,7 +109,8 @@ class _TextPlaygroundState extends State<TextPlayground> {
         PropertyBinding<TextAlign>(
           codeName: 'textAlign',
           labelDe: 'Ausrichtung',
-          helpDe: 'Text.textAlign',
+          helpDe: 'Text.textAlign innerhalb der verfügbaren Breite.',
+          useCaseDe: 'center für Hero-Text, left/right für Formulare und Listen.',
           type: PropertyControlType.enumeration,
           enumValues: const [
             TextAlign.left,
@@ -94,10 +122,34 @@ class _TextPlaygroundState extends State<TextPlayground> {
           getValue: () => _c.textAlign,
           setValue: (v) => _c.update(() => _c.textAlign = v),
         ),
+        PropertyBinding<double>(
+          codeName: 'maxLines',
+          labelDe: 'Max. Zeilen',
+          helpDe: 'Text.maxLines begrenzt die sichtbare Zeilenzahl.',
+          useCaseDe: 'Karten, Listentitel und Snippets mit fester Höhe.',
+          type: PropertyControlType.slider,
+          min: 1,
+          max: 10,
+          divisions: 9,
+          getValue: () => _c.maxLines.toDouble(),
+          setValue: (v) => _c.update(() => _c.maxLines = v.round()),
+        ),
+        PropertyBinding<TextOverflow>(
+          codeName: 'overflow',
+          labelDe: 'Overflow',
+          helpDe: 'Text.overflow bei Platzmangel (nach maxLines).',
+          useCaseDe: 'ellipsis für einzeilige Titel, fade für dezente Abschnitte.',
+          type: PropertyControlType.enumeration,
+          enumValues: TextOverflow.values,
+          enumLabels: const ['clip', 'fade', 'ellipsis', 'visible'],
+          getValue: () => _c.overflow,
+          setValue: (v) => _c.update(() => _c.overflow = v),
+        ),
         PropertyBinding<Color>(
           codeName: 'color',
           labelDe: 'Farbe',
-          helpDe: 'TextStyle.color',
+          helpDe: 'TextStyle.color der Schrift.',
+          useCaseDe: 'Primärtext, deaktiviert (onSurfaceVariant) oder Akzentfarbe.',
           type: PropertyControlType.color,
           getValue: () => _c.color,
           setValue: (v) => _c.update(() => _c.color = v),
@@ -108,6 +160,8 @@ class _TextPlaygroundState extends State<TextPlayground> {
         child: Text(
           _c.data,
           textAlign: _c.textAlign,
+          maxLines: _c.maxLines,
+          overflow: _c.overflow,
           style: TextStyle(
             fontSize: _c.fontSize,
             fontWeight: _c.fontWeight,

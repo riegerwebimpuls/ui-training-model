@@ -6,7 +6,7 @@ enum CardDismissOrientation { up, down, left, right }
 
 enum CardSwipeOrientation { vertical, horizontal, free }
 
-/// Interaktiver Card-Stack (Screenshot-Vorbild).
+/// Interaktiver Card-Stack (Screenshot-Vorbild) — live wischbar.
 class CardStackDemo extends StatefulWidget {
   const CardStackDemo({
     super.key,
@@ -45,6 +45,10 @@ class _CardStackDemoState extends State<CardStackDemo>
   Offset _drag = Offset.zero;
   late AnimationController _snap;
 
+  /// Index in [_order] der visuell vordersten Karte.
+  int get _frontOrderIndex =>
+      widget.reverseOrder ? 0 : _order.length - 1;
+
   @override
   void initState() {
     super.initState();
@@ -75,7 +79,7 @@ class _CardStackDemoState extends State<CardStackDemo>
   }
 
   void _onDragEnd(DragEndDetails d) {
-    final threshold = 120.0;
+    const threshold = 120.0;
     final dismissed = switch (widget.dismissOrientation) {
       CardDismissOrientation.up => _drag.dy < -threshold,
       CardDismissOrientation.down => _drag.dy > threshold,
@@ -85,8 +89,12 @@ class _CardStackDemoState extends State<CardStackDemo>
 
     if (dismissed) {
       setState(() {
-        final front = _order.removeLast();
-        _order.insert(0, front);
+        final front = _order.removeAt(_frontOrderIndex);
+        if (widget.reverseOrder) {
+          _order.add(front);
+        } else {
+          _order.insert(0, front);
+        }
         _drag = Offset.zero;
       });
     } else {
@@ -99,7 +107,11 @@ class _CardStackDemoState extends State<CardStackDemo>
       void tick() {
         if (!_snap.isAnimating) return;
         setState(() {
-          _drag = Offset.lerp(from, Offset.zero, Curves.easeOut.transform(_snap.value))!;
+          _drag = Offset.lerp(
+            from,
+            Offset.zero,
+            Curves.easeOut.transform(_snap.value),
+          )!;
         });
       }
 
@@ -110,7 +122,8 @@ class _CardStackDemoState extends State<CardStackDemo>
 
   @override
   Widget build(BuildContext context) {
-    final indices = widget.reverseOrder
+    // Paint: hinten → vorne. Front = letzte Position im Stack.
+    final paintOrder = widget.reverseOrder
         ? _order.reversed.toList()
         : List<int>.from(_order);
 
@@ -124,12 +137,12 @@ class _CardStackDemoState extends State<CardStackDemo>
         return Stack(
           clipBehavior: Clip.none,
           children: [
-            for (var depth = 0; depth < indices.length; depth++)
+            for (var depth = 0; depth < paintOrder.length; depth++)
               _buildCard(
-                indexLabel: indices[depth],
-                color: _colors[indices[depth] % _colors.length],
+                indexLabel: paintOrder[depth],
+                color: _colors[paintOrder[depth] % _colors.length],
                 depth: depth,
-                isFront: depth == indices.length - 1,
+                isFront: depth == paintOrder.length - 1,
                 width: w,
                 height: h,
                 baseTop: baseTop,
@@ -152,7 +165,9 @@ class _CardStackDemoState extends State<CardStackDemo>
     required double baseLeft,
   }) {
     final fromFront = (_order.length - 1) - depth;
-    final scale = math.pow(widget.scaleFactor.clamp(0.5, 1.2), fromFront).toDouble();
+    // scaleFactor < 1 → hintere Karten kleiner; clamp verhindert „größer hinten“.
+    final scale =
+        math.pow(widget.scaleFactor.clamp(0.5, 1.0), fromFront).toDouble();
     final yOffset = -fromFront * 14.0 * widget.positionFactor;
 
     var dx = 0.0;
@@ -194,20 +209,20 @@ class _CardStackDemoState extends State<CardStackDemo>
       ),
     );
 
-    final positioned = Positioned(
-      top: baseTop + dy,
-      left: baseLeft + dx + (width * (1 - scale) / 2),
-      child: Opacity(
-        opacity: opacity,
-        child: Transform.scale(
-          scale: scale,
-          alignment: Alignment.topCenter,
-          child: card,
+    if (!isFront) {
+      return Positioned(
+        top: baseTop + dy,
+        left: baseLeft + dx + (width * (1 - scale) / 2),
+        child: Opacity(
+          opacity: opacity,
+          child: Transform.scale(
+            scale: scale,
+            alignment: Alignment.topCenter,
+            child: card,
+          ),
         ),
-      ),
-    );
-
-    if (!isFront) return positioned;
+      );
+    }
 
     return Positioned(
       top: baseTop + dy,

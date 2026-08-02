@@ -1,9 +1,9 @@
 # UI Training Lab
 
-Interaktives **Flutter-Web**-Trainingslab für Widget-Properties: Katalog → Playground mit Controls (deutscher Hilfetext + echter Flutter-`codeName`) → Live-Preview als Mini-Simulation.
+Interaktives **Flutter-Web**-Trainingslab für Widget-Properties: Katalog → Playground mit Controls (deutscher Hilfetext + Einsatz + echter Flutter-`codeName`) → Live-Preview als interaktive Mini-Simulation → Offline-Widget-Chat.
 
 Repo: [`riegerwebimpuls/ui-training-model`](https://github.com/riegerwebimpuls/ui-training-model)  
-Workspace-Klon unter Aftonomos: `workspaces/ui-training-model` (Diagnose/Automation läuft parallel und ist getrennt von diesem Feature-Bau).
+Workspace-Klon unter Aftonomos: `workspaces/ui-training-model`.
 
 ## Starten
 
@@ -15,66 +15,66 @@ flutter pub get
 flutter run -d chrome
 ```
 
-Analyse:
+Analyse / Tests:
 
 ```bash
 flutter analyze
+flutter test
 ```
 
-Web-Build (optional, z. B. für GitHub Pages später):
+Optionaler LLM-Hinweis (Standard bleibt offline, kein Netzwerk-Call):
+
+```bash
+flutter run -d chrome \
+  --dart-define=UITRAINING_LLM_ENDPOINT=https://example.invalid \
+  --dart-define=UITRAINING_LLM_API_KEY=
+```
+
+Web-Build:
 
 ```bash
 flutter build web
-# Ausgabe unter build/web — Deploy z. B. als GitHub Pages Static Site
 ```
 
 ## Bedienung
 
 1. **Katalog**: Suche nach Widget-/Property-Namen, Filter über Kategorie-Chips.
 2. **Playground**: Desktop = Controls links / Preview rechts; Mobile = Controls oben / Preview unten.
-3. Theme-Toggle in der AppBar (Hell / Dunkel / System).
-4. Card-Stack: vordere Karte wischen — steuert `borderRadius`, `positionFactor`, `scaleFactor`, `reverseOrder`, `opacityOnDrag`, `dismissOrientation`, `swipeOrientation`.
+3. Jede Property zeigt `codeName`, kurze visuelle Erklärung und empfohlenen **Einsatz**.
+4. **Live-Vorschau** ist interaktiv (Scroll, Swipe, Tap, Dialoge/Sheets im Phone-Frame).
+5. **Widget-Chat** (FAB): Offline-Knowledge-Bot mit FAQ + Keyword-Matching über die Docs dieses Moduls.
+6. Theme-Toggle in der AppBar (Hell / Dunkel / System).
 
 ## Neues Playground in 3 Schritten
 
-1. Datei unter `lib/playgrounds/<kategorie>/mein_playground.dart` anlegen:
+1. Datei unter `lib/playgrounds/<kategorie>/mein_playground.dart`:
    - `PlaygroundController` mit State
-   - Liste von `PropertyBinding`s (codeName + labelDe + helpDe)
-   - `PlaygroundShell` mit `previewBuilder`
-2. In `lib/catalog/registry.dart` einen `WidgetModule`-Eintrag registrieren (`id`, `category`, `tags`, `builder`).
-3. Optional: Roadmap-Slot (`planned: true`) entfernen bzw. ersetzen.
+   - `PropertyBinding`s mit `codeName`, `labelDe`, `helpDe`, `useCaseDe`
+   - `PlaygroundShell` mit `moduleId`, `explanationDe`, `useCaseDe`, `faq`, `previewBuilder`
+2. In `lib/catalog/registry.dart` registrieren.
+3. Optional FAQ für den Offline-Chat ergänzen.
 
-Generische Controls liegen unter `lib/core/controls/`. Die Shell ist `lib/core/playground_shell.dart`.
-
-## Katalog (MVP)
+## Katalog
 
 | Kategorie | Module |
 |-----------|--------|
 | Layout | Container, Padding/Margin, Row/Column/Expanded, Stack/Positioned, SizedBox |
 | Text & Icons | Text/TextStyle, Icon |
-| Input | Buttons, TextField, Switch/Checkbox/Slider/Dropdown |
-| Listen | ListTile, ListView |
-| Navigation | AppBar, BottomNavigationBar, TabBar+TabBarView |
+| Input | Buttons, TextField, Selection, Chip/FilterChip |
+| Listen | ListTile, ListView, DataTable |
+| Navigation | AppBar, BottomNavigationBar, TabBar, NavigationRail, SliverAppBar |
 | Feedback | SnackBar, AlertDialog, CircularProgressIndicator |
-| Viral | Card-Stack Swiper, PageView Carousel, Modal Bottom Sheet, Story-Ringe |
+| Viral | Card-Stack, PageView Carousel, Modal Bottom Sheet, Story-Ringe |
 | Cupertino | CupertinoButton, CupertinoSwitch |
 
-## Roadmap (nächste Iterationen)
-
-Registriert als geplante Slots (noch ohne volles Binding):
-
-- `DataTable`
-- `Chip` / `FilterChip`
-- `NavigationRail`
-- `SliverAppBar`
-
-Weitere Kandidaten: `GestureDetector`-Demos, `AnimatedContainer`, `Hero`, Formular-Validierung, Accessibility-Properties.
+Weitere Kandidaten: `GestureDetector`, `AnimatedContainer`, `Hero`, Formular-Validierung, Accessibility.
 
 ## Architektur (kurz)
 
 ```
 lib/
   catalog/     # Registry + CatalogPage
+  chat/        # OfflineChatEngine + WidgetChatPanel (+ optional LLM config)
   core/        # PlaygroundShell, PropertyBinding, Controls
   playgrounds/ # Modul-spezifische Previews + Bindings
   widgets/     # Wiederverwendbare Demo-Widgets (CardStack)
@@ -82,4 +82,4 @@ lib/
 ```
 
 State: `flutter_riverpod` (Theme + Katalog-Filter) und `ChangeNotifier` pro Playground.  
-Routing: `go_router`.
+Routing: `go_router`. Preview: eigener `Navigator` + `ScaffoldMessenger` im Phone-Frame.

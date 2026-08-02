@@ -37,6 +37,7 @@ class _TextControlState extends State<TextControl> {
             labelDe: widget.binding.labelDe,
             codeName: widget.binding.codeName,
             helpDe: widget.binding.helpDe,
+            useCaseDe: widget.binding.useCaseDe,
           ),
           const SizedBox(height: 6),
           TextField(

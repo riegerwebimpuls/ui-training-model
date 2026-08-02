@@ -32,6 +32,7 @@ class ColorControl extends StatelessWidget {
             labelDe: binding.labelDe,
             codeName: binding.codeName,
             helpDe: binding.helpDe,
+            useCaseDe: binding.useCaseDe,
             valueText: '#${value.toARGB32().toRadixString(16).padLeft(8, '0')}',
           ),
           const SizedBox(height: 8),

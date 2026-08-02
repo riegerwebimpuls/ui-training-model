@@ -20,6 +20,7 @@ class SwitchControl extends StatelessWidget {
               labelDe: binding.labelDe,
               codeName: binding.codeName,
               helpDe: binding.helpDe,
+              useCaseDe: binding.useCaseDe,
               valueText: value ? 'true' : 'false',
             ),
           ),

@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:ui_training_model/theme/app_theme.dart';
 
-/// Zeigt deutschen Hilfetext + Flutter-[codeName] + optionalen Live-Wert.
+/// Zeigt deutschen Hilfetext + Flutter-[codeName] + Einsatz + optionalen Live-Wert.
 class ControlLabel extends StatelessWidget {
   const ControlLabel({
     super.key,
     required this.labelDe,
     required this.codeName,
     required this.helpDe,
+    required this.useCaseDe,
     this.valueText,
   });
 
   final String labelDe;
   final String codeName;
   final String helpDe;
+  final String useCaseDe;
   final String? valueText;
 
   @override
@@ -45,13 +47,23 @@ class ControlLabel extends StatelessWidget {
           codeName,
           style: mono?.copyWith(color: scheme.tertiary),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 4),
         Text(
           helpDe,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
         ),
+        if (useCaseDe.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Text(
+            'Einsatz: $useCaseDe',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: scheme.primary,
+                  fontStyle: FontStyle.italic,
+                ),
+          ),
+        ],
       ],
     );
   }

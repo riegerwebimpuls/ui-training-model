@@ -22,10 +22,12 @@ class EnumControl<T> extends StatelessWidget {
             labelDe: binding.labelDe,
             codeName: binding.codeName,
             helpDe: binding.helpDe,
+            useCaseDe: binding.useCaseDe,
             valueText: '$current',
           ),
           const SizedBox(height: 6),
           DropdownButtonFormField<T>(
+            key: ValueKey('enum-${binding.codeName}-$current'),
             initialValue: values.contains(current) ? current : null,
             items: [
               for (var i = 0; i < values.length; i++)

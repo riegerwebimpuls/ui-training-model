@@ -58,6 +58,7 @@ class _NumberControlState extends State<NumberControl> {
             labelDe: widget.binding.labelDe,
             codeName: widget.binding.codeName,
             helpDe: widget.binding.helpDe,
+            useCaseDe: widget.binding.useCaseDe,
             valueText: widget.binding.getValue().toString(),
           ),
           const SizedBox(height: 6),

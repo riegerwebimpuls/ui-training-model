@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:ui_training_model/catalog/widget_module.dart';
 import 'package:ui_training_model/playgrounds/cupertino/cupertino_button_playground.dart';
 import 'package:ui_training_model/playgrounds/cupertino/cupertino_switch_playground.dart';
 import 'package:ui_training_model/playgrounds/feedback/snackbar_dialog_playground.dart';
 import 'package:ui_training_model/playgrounds/input/button_playground.dart';
+import 'package:ui_training_model/playgrounds/input/chip_playground.dart';
 import 'package:ui_training_model/playgrounds/input/selection_controls_playground.dart';
 import 'package:ui_training_model/playgrounds/input/text_field_playground.dart';
 import 'package:ui_training_model/playgrounds/layout/container_playground.dart';
@@ -11,10 +11,13 @@ import 'package:ui_training_model/playgrounds/layout/flex_playground.dart';
 import 'package:ui_training_model/playgrounds/layout/padding_playground.dart';
 import 'package:ui_training_model/playgrounds/layout/sized_box_playground.dart';
 import 'package:ui_training_model/playgrounds/layout/stack_playground.dart';
+import 'package:ui_training_model/playgrounds/lists/data_table_playground.dart';
 import 'package:ui_training_model/playgrounds/lists/list_tile_playground.dart';
 import 'package:ui_training_model/playgrounds/lists/list_view_playground.dart';
 import 'package:ui_training_model/playgrounds/navigation/app_bar_playground.dart';
 import 'package:ui_training_model/playgrounds/navigation/bottom_nav_playground.dart';
+import 'package:ui_training_model/playgrounds/navigation/navigation_rail_playground.dart';
+import 'package:ui_training_model/playgrounds/navigation/sliver_app_bar_playground.dart';
 import 'package:ui_training_model/playgrounds/navigation/tab_bar_playground.dart';
 import 'package:ui_training_model/playgrounds/text/icon_playground.dart';
 import 'package:ui_training_model/playgrounds/text/text_playground.dart';
@@ -119,6 +122,14 @@ class WidgetRegistry {
       tags: const ['Switch', 'Checkbox', 'Slider', 'DropdownButton'],
       builder: (_) => const SelectionControlsPlayground(),
     ),
+    WidgetModule(
+      id: 'chip',
+      title: 'Chip / FilterChip',
+      description: 'Tags, Filter und entfernbare Eingabe-Chips.',
+      category: WidgetCategory.input,
+      tags: const ['Chip', 'FilterChip', 'ChoiceChip', 'InputChip'],
+      builder: (_) => const ChipPlayground(),
+    ),
 
     // Listen
     WidgetModule(
@@ -136,6 +147,14 @@ class WidgetRegistry {
       category: WidgetCategory.lists,
       tags: const ['ListView', 'itemExtent', 'scrollDirection'],
       builder: (_) => const ListViewPlayground(),
+    ),
+    WidgetModule(
+      id: 'data-table',
+      title: 'DataTable',
+      description: 'Tabellarische Daten mit Sortierung und Checkbox-Auswahl.',
+      category: WidgetCategory.lists,
+      tags: const ['DataTable', 'sortColumnIndex', 'showCheckboxColumn'],
+      builder: (_) => const DataTablePlayground(),
     ),
 
     // Navigation
@@ -162,6 +181,22 @@ class WidgetRegistry {
       category: WidgetCategory.navigation,
       tags: const ['TabBar', 'TabBarView', 'isScrollable'],
       builder: (_) => const TabBarPlayground(),
+    ),
+    WidgetModule(
+      id: 'navigation-rail',
+      title: 'NavigationRail',
+      description: 'Seitliche Navigation für breite Layouts.',
+      category: WidgetCategory.navigation,
+      tags: const ['NavigationRail', 'extended', 'labelType'],
+      builder: (_) => const NavigationRailPlayground(),
+    ),
+    WidgetModule(
+      id: 'sliver-app-bar',
+      title: 'SliverAppBar',
+      description: 'Kollabierende AppBar in CustomScrollView.',
+      category: WidgetCategory.navigation,
+      tags: const ['SliverAppBar', 'CustomScrollView', 'FlexibleSpaceBar'],
+      builder: (_) => const SliverAppBarPlayground(),
     ),
 
     // Feedback
@@ -236,58 +271,7 @@ class WidgetRegistry {
       tags: const ['CupertinoSwitch', 'activeTrackColor'],
       builder: (_) => const CupertinoSwitchPlayground(),
     ),
-
-    // Roadmap slots (planned)
-    ..._plannedSlots,
   ];
-
-  static const _plannedSlots = <WidgetModule>[
-    WidgetModule(
-      id: 'data-table',
-      title: 'DataTable',
-      description: 'Tabellarische Daten – geplant.',
-      category: WidgetCategory.roadmap,
-      tags: ['DataTable'],
-      planned: true,
-      builder: _plannedStub,
-    ),
-    WidgetModule(
-      id: 'chip',
-      title: 'Chip / FilterChip',
-      description: 'Chips und Filter – geplant.',
-      category: WidgetCategory.roadmap,
-      tags: ['Chip', 'FilterChip'],
-      planned: true,
-      builder: _plannedStub,
-    ),
-    WidgetModule(
-      id: 'navigation-rail',
-      title: 'NavigationRail',
-      description: 'Desktop-seitige Navigation – geplant.',
-      category: WidgetCategory.roadmap,
-      tags: ['NavigationRail'],
-      planned: true,
-      builder: _plannedStub,
-    ),
-    WidgetModule(
-      id: 'sliver-app-bar',
-      title: 'SliverAppBar',
-      description: 'Kollabierende AppBar in CustomScrollView – geplant.',
-      category: WidgetCategory.roadmap,
-      tags: ['SliverAppBar', 'CustomScrollView'],
-      planned: true,
-      builder: _plannedStub,
-    ),
-  ];
-
-  static Widget _plannedStub(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Geplant')),
-      body: const Center(
-        child: Text('Dieses Modul ist auf der Roadmap und noch nicht gebaut.'),
-      ),
-    );
-  }
 
   static WidgetModule? byId(String id) {
     for (final m in modules) {
