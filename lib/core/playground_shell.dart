@@ -68,26 +68,51 @@ class PlaygroundShell extends StatelessWidget {
               IconButton(
                 tooltip: 'Info',
                 onPressed: () {
+                  final explanation = explanationDe ?? description;
                   showDialog<void>(
                     context: context,
                     builder: (ctx) => AlertDialog(
                       title: Text(title),
                       content: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(explanationDe ?? description),
-                            if (useCaseDe != null) ...[
-                              const SizedBox(height: 12),
-                              Text(
-                                'Einsatz',
-                                style: Theme.of(ctx).textTheme.titleSmall,
+                        child: SelectionArea(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(child: Text(explanation)),
+                                  CopyTextIconButton(
+                                    text: explanation,
+                                    tooltip: 'Erklärung kopieren',
+                                    feedback: 'Erklärung kopiert',
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 4),
-                              Text(useCaseDe!),
+                              if (useCaseDe != null) ...[
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        'Einsatz',
+                                        style:
+                                            Theme.of(ctx).textTheme.titleSmall,
+                                      ),
+                                    ),
+                                    CopyTextIconButton(
+                                      text: useCaseDe!,
+                                      tooltip: 'Einsatz kopieren',
+                                      feedback: 'Einsatz kopiert',
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(useCaseDe!),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
                       actions: [
@@ -145,27 +170,48 @@ class _ControlsPanel extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
         children: [
-          Text(
-            'Über dieses Widget',
-            style: Theme.of(context).textTheme.titleMedium,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Über dieses Widget',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              CopyTextIconButton(
+                text: [
+                  explanationDe,
+                  if (useCaseDe != null) 'Einsatz: $useCaseDe',
+                ].join('\n\n'),
+                tooltip: 'Modul-Info kopieren',
+                feedback: 'Modul-Info kopiert',
+              ),
+            ],
           ),
           const SizedBox(height: 6),
-          Text(
-            explanationDe,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
+          SelectionArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  explanationDe,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                 ),
-          ),
-          if (useCaseDe != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Einsatz: $useCaseDe',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: scheme.primary,
-                    fontStyle: FontStyle.italic,
+                if (useCaseDe != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Einsatz: $useCaseDe',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: scheme.primary,
+                          fontStyle: FontStyle.italic,
+                        ),
                   ),
+                ],
+              ],
             ),
-          ],
+          ),
           const SizedBox(height: 16),
           Text(
             'Eigenschaften',
@@ -173,7 +219,8 @@ class _ControlsPanel extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Deutsche Erklärung + Einsatz + echter Flutter-codeName',
+            'Deutsche Erklärung + Einsatz + echter Flutter-codeName '
+            '(markieren oder per Kopier-Icon)',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),

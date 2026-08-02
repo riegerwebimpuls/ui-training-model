@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:ui_training_model/core/controls/copyable.dart';
 import 'package:ui_training_model/theme/app_theme.dart';
 
 /// Zeigt deutschen Hilfetext + Flutter-[codeName] + Einsatz + optionalen Live-Wert.
+///
+/// Texte sind per [SelectionArea] markier- und kopierbar; der `codeName` hat
+/// zusätzlich einen One-Tap-Copy-Button.
 class ControlLabel extends StatelessWidget {
   const ControlLabel({
     super.key,
@@ -24,47 +28,61 @@ class ControlLabel extends StatelessWidget {
         Theme.of(context).textTheme.bodySmall;
     final scheme = Theme.of(context).colorScheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                labelDe,
-                style: Theme.of(context).textTheme.titleSmall,
+    return SelectionArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  labelDe,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
               ),
-            ),
-            if (valueText != null)
-              Text(
-                valueText!,
-                style: mono?.copyWith(color: scheme.primary),
-              ),
-          ],
-        ),
-        const SizedBox(height: 2),
-        Text(
-          codeName,
-          style: mono?.copyWith(color: scheme.tertiary),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          helpDe,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-        ),
-        if (useCaseDe.isNotEmpty) ...[
+              if (valueText != null)
+                Text(
+                  valueText!,
+                  style: mono?.copyWith(color: scheme.primary),
+                ),
+            ],
+          ),
           const SizedBox(height: 2),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  codeName,
+                  style: mono?.copyWith(color: scheme.tertiary),
+                ),
+              ),
+              CopyTextIconButton(
+                text: codeName,
+                tooltip: 'codeName kopieren',
+                feedback: 'codeName kopiert',
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
           Text(
-            'Einsatz: $useCaseDe',
+            helpDe,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.primary,
-                  fontStyle: FontStyle.italic,
+                  color: scheme.onSurfaceVariant,
                 ),
           ),
+          if (useCaseDe.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              'Einsatz: $useCaseDe',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.primary,
+                    fontStyle: FontStyle.italic,
+                  ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

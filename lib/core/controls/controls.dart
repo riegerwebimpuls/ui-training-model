@@ -1,5 +1,6 @@
 export 'color_control.dart';
 export 'control_label.dart';
+export 'copyable.dart';
 export 'enum_control.dart';
 export 'number_control.dart';
 export 'slider_control.dart';
