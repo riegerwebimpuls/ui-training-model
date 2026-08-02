@@ -122,12 +122,27 @@ class _CardStackPlaygroundState extends State<CardStackPlayground> {
           labelDe: 'Dismiss-Richtung',
           helpDe: 'Richtung, in die gewischt werden muss zum Entfernen.',
           useCaseDe:
-              'up für Tinder-Swipe nach oben; horizontal für Links/Rechts-Entscheidungen.',
+              'up für Tinder-Swipe nach oben; left/right für horizontale Entscheidungen.',
           type: PropertyControlType.enumeration,
           enumValues: CardDismissOrientation.values,
           enumLabels: const ['up', 'down', 'left', 'right'],
           getValue: () => _c.dismissOrientation,
-          setValue: (v) => _c.update(() => _c.dismissOrientation = v),
+          setValue: (v) => _c.update(() {
+            _c.dismissOrientation = v;
+            // Keep swipe axis compatible so dismiss can actually fire.
+            _c.swipeOrientation = switch (v) {
+              CardDismissOrientation.up ||
+              CardDismissOrientation.down =>
+                _c.swipeOrientation == CardSwipeOrientation.horizontal
+                    ? CardSwipeOrientation.vertical
+                    : _c.swipeOrientation,
+              CardDismissOrientation.left ||
+              CardDismissOrientation.right =>
+                _c.swipeOrientation == CardSwipeOrientation.vertical
+                    ? CardSwipeOrientation.horizontal
+                    : _c.swipeOrientation,
+            };
+          }),
         ),
         PropertyBinding<CardSwipeOrientation>(
           codeName: 'swipeOrientation',
@@ -139,7 +154,23 @@ class _CardStackPlaygroundState extends State<CardStackPlayground> {
           enumValues: CardSwipeOrientation.values,
           enumLabels: const ['vertical', 'horizontal', 'free'],
           getValue: () => _c.swipeOrientation,
-          setValue: (v) => _c.update(() => _c.swipeOrientation = v),
+          setValue: (v) => _c.update(() {
+            _c.swipeOrientation = v;
+            // Keep dismiss direction on the allowed axis.
+            _c.dismissOrientation = switch (v) {
+              CardSwipeOrientation.vertical =>
+                (_c.dismissOrientation == CardDismissOrientation.left ||
+                        _c.dismissOrientation == CardDismissOrientation.right)
+                    ? CardDismissOrientation.up
+                    : _c.dismissOrientation,
+              CardSwipeOrientation.horizontal =>
+                (_c.dismissOrientation == CardDismissOrientation.up ||
+                        _c.dismissOrientation == CardDismissOrientation.down)
+                    ? CardDismissOrientation.left
+                    : _c.dismissOrientation,
+              CardSwipeOrientation.free => _c.dismissOrientation,
+            };
+          }),
         ),
       ],
       previewBuilder: (_) => ColoredBox(
